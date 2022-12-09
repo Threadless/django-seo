@@ -5,6 +5,9 @@ from django.utils import six
 from django import template
 from djangoseo.seo import get_metadata, get_linked_metadata
 from django.template import VariableDoesNotExist
+from six.moves.urllib.parse import parse_qsl, urlencode, urlparse
+
+
 
 register = template.Library()
 
@@ -30,7 +33,24 @@ class MetadataNode(template.Node):
             if callable(target):
                 target = target()
             if isinstance(target, six.string_types):
-                path = target
+                # path = target
+                # inspect the string target for querystring if found: sort the keys of the query string and set to path
+                # else: set path = target
+                # NOTE 1.11 This is code to enable query string matching it is not in the orignal repo
+                # it requires the context_processor for current_path
+                # here context.get('current_path') should be:
+                # u'/search/?departments=accessories&sort=popular&style=hat&type=cuffed-knit-beanie'
+                # and target should be:
+                # u'/search/'
+                path = context.get('current_path', target)
+                parsed = urlparse(path)
+                if parsed[4]:
+                    query_string = parse_qsl(parsed[4])
+                    sorted_qs = sorted(query_string, key=lambda tup: tup[0])
+                    new_qs = urlencode(sorted_qs, 'utf-8')
+                    parsed = parsed._replace(query=new_qs)
+                    path = parsed.geturl()
+
             elif hasattr(target, 'get_absolute_url'):
                 path = target.get_absolute_url()
             elif hasattr(target, "__iter__") and 'get_absolute_url' in target:

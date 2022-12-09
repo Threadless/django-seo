@@ -15,9 +15,11 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.template import Template, Context
 
 from djangoseo.utils import resolve_to_name, NotSet, Literal
+import os
+from six.moves.urllib.parse import parse_qsl, urlencode, urlparse
 
 RESERVED_FIELD_NAMES = ('_metadata', '_path', '_content_type', '_object_id',
-                        '_content_object', '_view', '_site', 'objects', 
+                        '_content_object', '_view', '_site', 'objects',
                         '_resolve_value', '_set_context', 'id', 'pk')
 
 backend_registry = OrderedDict()
@@ -247,6 +249,29 @@ class PathBackend(MetadataBackend):
 
             def _populate_from_kwargs(self):
                 return {'path': self._path}
+
+            def save(self, *args, **kwargs):
+                """ orders the querystring parameters with `sorted` function
+
+                The save method looks at the path supplied by the user and
+                if there is a querystring present the querystring arguments
+                will be sorted by key. This is so when querystring arguments
+                come in from the client they can be ordered and
+                checked against the database in a predictable way.
+                """
+                parsed = urlparse(self._path)
+                if settings.APPEND_SLASH:
+                    if parsed[2]:
+                        new_path = os.path.join(parsed[2], '', '')
+                        parsed = parsed._replace(path=new_path)
+                if parsed[4]:
+                    query_string = parse_qsl(parsed[4])
+                    sorted_qs = sorted(query_string, key=lambda tup: tup[0])
+                    new_qs = urlencode(sorted_qs)
+                    parsed = parsed._replace(query=new_qs)
+                    self._path = parsed.geturl()
+
+                super(PathMetadataBase, self).save(*args, **kwargs)
 
             def _resolve_value(self, name):
                 value = super(PathMetadataBase, self)._resolve_value(name)
