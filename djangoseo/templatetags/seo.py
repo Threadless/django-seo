@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from django.conf import settings
 from django.utils import six
 from django import template
 from djangoseo.seo import get_metadata, get_linked_metadata
 from django.template import VariableDoesNotExist
+import os
 from six.moves.urllib.parse import parse_qsl, urlencode, urlparse
 
 
@@ -44,6 +46,10 @@ class MetadataNode(template.Node):
                 # u'/search/'
                 path = context.get('current_path', target)
                 parsed = urlparse(path)
+                if settings.APPEND_SLASH:
+                    if parsed[2]:
+                        new_path = os.path.join(parsed[2], '', '')
+                        parsed = parsed._replace(path=new_path)
                 if parsed[4]:
                     query_string = parse_qsl(parsed[4])
                     sorted_qs = sorted(query_string, key=lambda tup: tup[0])
