@@ -1167,7 +1167,10 @@ class CreateDynamicModelTest(TestCase):
         self.assertNotEquals(self.model._meta.model_name.lower(), self.model_name)
 
     def test_model_fields(self):
-        received_fields = self.model._meta.get_all_field_names()
+        received_fields = []
+        for field in self.model._meta.get_fields():
+            received_fields.append(field.name)
+
         expected_fields = ['id'] + list(self.attrs.keys())
         self.assertSetEqual(set(received_fields), set(expected_fields))
 
