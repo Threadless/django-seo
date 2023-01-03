@@ -3,13 +3,11 @@
 
 from django.conf import settings
 from django.utils import six
+from django.utils.six.moves.urllib.parse import parse_qsl, urlencode, urlparse
 from django import template
 from djangoseo.seo import get_metadata, get_linked_metadata
 from django.template import VariableDoesNotExist
 import os
-from six.moves.urllib.parse import parse_qsl, urlencode, urlparse
-
-
 
 register = template.Library()
 

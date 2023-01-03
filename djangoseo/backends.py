@@ -3,6 +3,7 @@
 from collections import OrderedDict
 
 from django.utils import six
+from django.utils.six.moves.urllib.parse import parse_qsl, urlencode, urlparse
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 from django.db.utils import IntegrityError
@@ -16,7 +17,7 @@ from django.template import Template, Context
 
 from djangoseo.utils import resolve_to_name, NotSet, Literal
 import os
-from six.moves.urllib.parse import parse_qsl, urlencode, urlparse
+
 
 RESERVED_FIELD_NAMES = ('_metadata', '_path', '_content_type', '_object_id',
                         '_content_object', '_view', '_site', 'objects',
