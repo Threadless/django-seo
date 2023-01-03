@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404, render_to_response, render
 from django.template.context import RequestContext
 
 from userapp.models import Page, Tag, Product
@@ -24,7 +24,7 @@ def tag_detail(request, tag_name):
 
 def my_view(request, text):
     context = {'text': text}
-    return render_to_response('my_view.html', context, context_instance=RequestContext(request))
+    return render(request, 'my_view.html', context)
 
 
 def my_other_view(request, text):
